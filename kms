@@ -1,0 +1,114 @@
+https://docs.google.com/document/d/1PiHcXLJ93zOmeY-1BToRr-X0Az4vt7UWMN1rQBw7luI/edit?usp=sharing
+
+https://docs.google.com/document/d/137z48GMwp4okkvAZhxUD-TXaS9z93N-FaqyUq7IB6uQ/edit?usp=sharing
+
+https://docs.google.com/document/d/1MwNqij-7PsEhopvmFwyB2s2PThpUczz4Uas0VZ3Gpm0/edit?usp=sharing
+
+https://docs.google.com/document/d/1b8oVRsss4g7eDyhn1QegX9n2OtVuBmk5L3vGrs6og9Q/edit?usp=sharing
+
+https://docs.google.com/document/d/1JTjzjY3UiGr8xCsjkxI6UPhy6d3-KwParM04MHEZX-4/edit?usp=sharing
+
+https://docs.google.com/document/d/1kDuvq0XVtWtXt7WlmVO8S8Q07LOBupaW8JziACGGXu8/edit?usp=sharing
+
+https://docs.google.com/document/d/1U1dxnzchvnBVwvk_GYfSEsFcX4wvrB1_hcZCKgd952g/edit?usp=sharing
+
+https://docs.google.com/document/d/1iCe8PqIRsYdEwjZbqlQD471K6WC6GbcjoVYpwwQFmps/edit?usp=sharing
+
+https://docs.google.com/document/d/1ybWYM6M65gWmB6UmYaVoHHCakDoM5DY3fUK4o3tn7ic/edit?usp=sharing
+
+https://docs.google.com/document/d/1AUVWkx2ONTuRTc7yAJsiW1H10jwy1B0Ss-4AQCGxzJg/edit?usp=sharing
+
+docker run -d -p 8000:8000 -e "SPLUNK_START_ARGS=--accept-license" -e "SPLUNK_PASSWORD=G#523&hse" --name splunk splunk/splunk:latest
+
+index="_internal" | stats count by sourcetype
+| tstats count where index=_internal by sourcetype
+
+Setting up the AWS env
+ubuntu instance with 2 cpu cores 4 gb ram 
+Add a volume of 20 gb - enable delete on termination
+Security group - All traffic from anywhere
+
+apt-get update -y 
+apt-get dist-upgrade -y
+Reboot the instance 
+
+As root 
+Find out name of disk we added
+fdisk -l
+
+Create physical vol
+pvcreate /dev/xvdb
+
+Verify creation
+pvs
+
+Create a splunk volume group
+vgcreate splunkvg /dev/xvdb
+
+Confirm creation
+vgs
+
+Create logical volume
+lvcreate -l 100%FREE -n splunk splunkvg
+
+confirm creation
+lvs
+
+Create a file system
+mkfs.xfs /dev/mapper/splunkvg-splunk (tab complete)
+
+Create a splunk dir
+mkdir /opt/splunk
+
+Mofify the file system table
+nano /etc/fstab
+
+Add new line
+/dev/mapper/splunkvg-splunk	/opt/splunk	xfs	defaults	0	0
+
+mount -a
+df -h 
+
+Installing Splunk
+Create a free Splunk account at www.splunnk.com
+Login to Splunk account
+
+Click on Splunk enterprise
+Select linux and download the tgz package via the command line
+Download splunk into the tmp directory.
+
+Create a splunk user -- accept all defaults
+adduser splunk
+
+Ensure the splunk user can access the Splunk dir
+chown splunk:splunk /opt/splunk 
+chown splunk:splunk /tmp/splunk-xxxxxxx.tgz 
+
+Switch to the splunk user
+su - splunk
+
+Extract splunk in the splunk dir
+cd /opt
+tar -zxvf /tmp/splunk-xxxxx.tgz
+
+cd splunk
+ls
+
+Start splunk
+/opt/splunk/bin/splunk start --accept-license
+
+set an admin user & password
+
+Access the splunk ui using the instance's public ip on port 8000
+
+Log in with the username and password specified. 
+
+To verify that splunk is working, click on search and reporting 
+Search the following:
+index=_internal
+index=_audit
+
+Enable boot start (As root)
+/opt/splunk/bin/splunk enable boot-start -user splunk -systemd-managed 0
+
+Reboot the instance
